@@ -101,15 +101,7 @@ export default class SalesforceRestApi extends HttpClient {
     /** 
      * @returns {object}
     */
-
-
-    async send() {
-        /*
-        if (this.instanceUrl == null || this.accessToken == null || this.instanceUrl == "" || this.accessToken == "") {
-            throw new Error("Invalid access credentials, cannot send " + this.method + " request");
-        }
-        */
-       
+    send() {
         let config = {
             method: this.method,
             headers: this.headers
@@ -121,19 +113,24 @@ export default class SalesforceRestApi extends HttpClient {
 
         const req = new Request(this.instanceUrl + this.path, config);
         
-        const resp = await super.send(req);
+        let resp = super.send(req);
 
-        if(["PATCH", "OPTIONS", "DELETE"].includes(req.method) && resp.status >= 200 && resp.status <= 299 ) {
-            return resp;
-        }
-
-
-        else return await resp.json()
-        .then((json) => {
-            if(json.errorCode != null){
-                console.log(json.errorCode)
-            }
-            return json;
-        });
+        if(["PATCH", "DELETE"].includes(this.method)) 
+        {
+            return resp.then(resp => resp.ok);
+        } 
+        else 
+        {
+            return resp.then(resp => resp.json())
+            .then((json) => {
+                if(json.errorCode != null) { 
+                    console.log(json.errorCode);
+                }
+                return json;
+            })
+            .catch((err) => {
+                console.error('Error:', err);
+            });
+        }   
     }
 }
