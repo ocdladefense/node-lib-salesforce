@@ -1,6 +1,6 @@
 {
     "name": "@ocdla/salesforce",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "A library to interface with the Salesforce REST API",
     "type": "module",
     "scripts": {
