@@ -40,7 +40,7 @@ export default class SalesforceRestApi extends HttpClient {
         this.instanceUrl = instanceUrl;
         this.accessToken = accessToken;
         this.headers = new Headers();
-        let authHeader = "Bearer " + this.accessToken; 
+        let authHeader = "Bearer " + this.accessToken;
         this.headers.append("Authorization", authHeader);
         this.headers.append('Content-Type', 'application/json');
     }
@@ -66,7 +66,7 @@ export default class SalesforceRestApi extends HttpClient {
     */
     create(objectName, record) {
         this.method = 'POST';
-        this.path = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName; 
+        this.path = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
         this.body = JSON.stringify(record);
 
         return this.send();
@@ -86,6 +86,34 @@ export default class SalesforceRestApi extends HttpClient {
         return this.send();
     }
 
+
+    /** 
+     * @param {string} objectName
+     * @param {object} record
+     * @returns {object}
+    */
+    upsert(objectName, record, idField = "Id") {
+        let idValue = record[idField];
+        this.method = 'PATCH';
+        let basePath = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
+
+        if (idField == "Id") {
+            basePath += `/${idValue}`;
+        } else {
+            basePath += `/${idField}/${encodeURIComponent(idValue)}`;
+        }
+
+        this.path = basePath;
+
+        // Always remove the id field (or external id field) from the payload.
+        // Otherwise = 400 Bad Request.
+        delete record[idField];
+
+        this.body = JSON.stringify(record);
+
+        return this.send();
+    }
+
     /** 
      * @param {string} objectName
      * @param {object} record
@@ -94,7 +122,7 @@ export default class SalesforceRestApi extends HttpClient {
     delete(objectName, record) {
         this.method = 'DELETE';
         this.path = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName + `/${record}`;
-        
+
         return this.send();
     }
 
@@ -112,25 +140,23 @@ export default class SalesforceRestApi extends HttpClient {
         }
 
         const req = new Request(this.instanceUrl + this.path, config);
-        
+
         let resp = super.send(req);
 
-        if(["PATCH", "DELETE"].includes(this.method)) 
-        {
+        if (["PATCH", "DELETE"].includes(this.method)) {
             return resp.then(resp => resp.ok);
-        } 
-        else 
-        {
+        }
+        else {
             return resp.then(resp => resp.json())
-            .then((json) => {
-                if(json.errorCode != null) { 
-                    console.log(json.errorCode);
-                }
-                return json;
-            })
-            .catch((err) => {
-                console.error('Error:', err);
-            });
-        }   
+                .then((json) => {
+                    if (json.errorCode != null) {
+                        console.log(json.errorCode);
+                    }
+                    return json;
+                })
+                .catch((err) => {
+                    console.error('Error:', err);
+                });
+        }
     }
 }
