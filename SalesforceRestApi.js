@@ -90,6 +90,13 @@ export default class SalesforceRestApi extends HttpClient {
 
     }
 
+    async queryValueSet(valueSetId) {
+        this.method = "GET";
+        this.path = SalesforceRestApi.BASE_URL + 'tooling/sobjects/GlobalValueSet/' + valueSetId
+        let resp = await this.send();
+        return await resp.json();
+    }
+
 
     /**
     * @param {string} resourceId - The SQL query.
