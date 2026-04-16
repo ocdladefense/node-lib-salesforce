@@ -65,7 +65,7 @@ export default class SalesforceRestApi extends HttpClient {
 
 
         this.method = 'GET';
-        this.path = SalesforceRestApi.BASE_URL + 'query?q=' + queryString;
+        this.path = SalesforceRestApi.BASE_URL + 'query?q=' + encodeURIComponent(queryString);
 
 
         let resp = await this.send();
@@ -173,9 +173,11 @@ export default class SalesforceRestApi extends HttpClient {
         let basePath = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
 
 
-        if (idField == "Id") {
+        if (idField == "Id")
+        {
             basePath += `/${idValue}`;
-        } else {
+        } else
+        {
             basePath += `/${idField}/${encodeURIComponent(idValue)}`;
         }
 
@@ -219,7 +221,8 @@ export default class SalesforceRestApi extends HttpClient {
         };
 
 
-        if (["GET", "DELETE"].includes(this.method) == false) {
+        if (["GET", "DELETE"].includes(this.method) == false)
+        {
             config.body = this.body;
         }
 
