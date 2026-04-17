@@ -97,6 +97,13 @@ export default class SalesforceRestApi extends HttpClient {
         return await resp.json();
     }
 
+    async queryObjectMetadata(objectName) {
+        this.method = "GET";
+        this.path = SalesforceRestApi.BASE_URL + "sobjects/" + objectName + "/describe";
+        let resp = await this.send();
+        return await resp.json();
+    }
+
 
     /**
     * @param {string} resourceId - The SQL query.
@@ -173,11 +180,9 @@ export default class SalesforceRestApi extends HttpClient {
         let basePath = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
 
 
-        if (idField == "Id")
-        {
+        if (idField == "Id") {
             basePath += `/${idValue}`;
-        } else
-        {
+        } else {
             basePath += `/${idField}/${encodeURIComponent(idValue)}`;
         }
 
@@ -221,8 +226,7 @@ export default class SalesforceRestApi extends HttpClient {
         };
 
 
-        if (["GET", "DELETE"].includes(this.method) == false)
-        {
+        if (["GET", "DELETE"].includes(this.method) == false) {
             config.body = this.body;
         }
 
