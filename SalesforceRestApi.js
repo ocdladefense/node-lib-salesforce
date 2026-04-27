@@ -160,6 +160,13 @@ export default class SalesforceRestApi extends HttpClient {
         this.method = 'PATCH';
         this.path = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName + `/${record.Id}`;
         delete record.Id;
+
+        Object.keys(record).forEach((key) => {
+            if (record[key] === "") {
+                record[key] = null;
+            }
+        });
+
         this.body = JSON.stringify(record);
 
 
