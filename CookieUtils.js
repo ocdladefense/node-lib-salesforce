@@ -1,16 +1,20 @@
 export function getCookie(name) {
-    const cookieName = name + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+
+    for (let i = 0; i < ca.length; i++)
+    {
         let c = ca[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
+        // Strip leading spaces from the cookie string
+        while (c.charAt(0) === ' ')
+        {
+            c = c.substring(1, c.length);
         }
-        if (c.indexOf(cookieName) === 0) {
-            return c.substring(cookieName.length, c.length);
+        // Check if the cookie name matches
+        if (c.indexOf(nameEQ) === 0)
+        {
+            return decodeURIComponent(c.substring(nameEQ.length, c.length));
         }
     }
-    return "";
+    return null;
 }
-

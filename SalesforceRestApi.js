@@ -55,6 +55,11 @@ export default class SalesforceRestApi extends HttpClient {
     }
 
 
+    isReady() {
+        return this.instanceUrl != null || this.accessToken != null;
+    }
+
+
     /**
      * @param {string} queryString - The SQL query.
      * @returns {object}
@@ -187,9 +192,11 @@ export default class SalesforceRestApi extends HttpClient {
         let basePath = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
 
 
-        if (idField == "Id") {
+        if (idField == "Id")
+        {
             basePath += `/${idValue}`;
-        } else {
+        } else
+        {
             basePath += `/${idField}/${encodeURIComponent(idValue)}`;
         }
 
@@ -226,14 +233,23 @@ export default class SalesforceRestApi extends HttpClient {
     /**
      * @returns {object}
     */
-    send() {
+    async send() {
+
+
+        if (!this.instanceUrl || !this.accessToken)
+        {
+            throw new Error("SalesforceRestApi: Missing instance URL or access token.");
+        }
+
+
         let config = {
             method: this.method,
             headers: this.headers
         };
 
 
-        if (["GET", "DELETE"].includes(this.method) == false) {
+        if (["GET", "DELETE"].includes(this.method) == false)
+        {
             config.body = this.body;
         }
 
@@ -241,8 +257,17 @@ export default class SalesforceRestApi extends HttpClient {
         const req = new Request(this.instanceUrl + this.path, config);
 
 
-        return super.send(req);
+        let resp = await super.send(req);
 
+        // Remove the cookies if the status code indicates the access token is no longer valid.
+        if (resp.status == 401)
+        {
+            deleteCookieStrict('access_token');
+            deleteCookieStrict('instance_url');
+            throw new Error(`HTTP error! status: ${resp.status}`);
+        }
+
+        return resp;
 
 
 
@@ -250,6 +275,17 @@ export default class SalesforceRestApi extends HttpClient {
 
     }
 }
+
+
+function deleteCookieStrict(name, path = '/', domain = '') {
+    let cookieString = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+
+    if (path) cookieString += ` path=${path};`;
+    if (domain) cookieString += ` domain=${domain};`;
+
+    document.cookie = cookieString;
+}
+
 
 
 
