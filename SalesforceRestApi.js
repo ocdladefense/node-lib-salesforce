@@ -12,6 +12,9 @@ export default class SalesforceRestApi extends HttpClient {
     accessToken;
 
 
+    userId;
+
+
     path;
 
 
@@ -44,10 +47,11 @@ export default class SalesforceRestApi extends HttpClient {
      * @param {string} instanceUrl - The
      * @param {string} accessToken - The
     */
-    constructor(instanceUrl, accessToken) {
+    constructor(instanceUrl, accessToken, userId) {
         super();
         this.instanceUrl = instanceUrl;
         this.accessToken = accessToken;
+        this.userId = userId;
         this.headers = new Headers();
         let authHeader = "Bearer " + this.accessToken;
         this.headers.append("Authorization", authHeader);
@@ -94,6 +98,8 @@ export default class SalesforceRestApi extends HttpClient {
 
 
     }
+
+
 
     async queryValueSet(valueSetId) {
         this.method = "GET";
@@ -192,11 +198,9 @@ export default class SalesforceRestApi extends HttpClient {
         let basePath = SalesforceRestApi.BASE_URL + 'sobjects/' + objectName;
 
 
-        if (idField == "Id")
-        {
+        if (idField == "Id") {
             basePath += `/${idValue}`;
-        } else
-        {
+        } else {
             basePath += `/${idField}/${encodeURIComponent(idValue)}`;
         }
 
@@ -236,8 +240,7 @@ export default class SalesforceRestApi extends HttpClient {
     async send() {
 
 
-        if (!this.instanceUrl || !this.accessToken)
-        {
+        if (!this.instanceUrl || !this.accessToken) {
             throw new Error("SalesforceRestApi: Missing instance URL or access token.");
         }
 
@@ -248,8 +251,7 @@ export default class SalesforceRestApi extends HttpClient {
         };
 
 
-        if (["GET", "DELETE"].includes(this.method) == false)
-        {
+        if (["GET", "DELETE"].includes(this.method) == false) {
             config.body = this.body;
         }
 
@@ -260,8 +262,7 @@ export default class SalesforceRestApi extends HttpClient {
         let resp = await super.send(req);
 
         // Remove the cookies if the status code indicates the access token is no longer valid.
-        if (resp.status == 401)
-        {
+        if (resp.status == 401) {
             deleteCookieStrict('access_token');
             deleteCookieStrict('instance_url');
             throw new Error(`HTTP error! status: ${resp.status}`);
@@ -273,6 +274,15 @@ export default class SalesforceRestApi extends HttpClient {
 
 
 
+    }
+
+    /**
+ * Gets the ID of the currently authenticated Salesforce user.
+ *
+ * @returns {string} The Salesforce user ID.
+ */
+    getUserId() {
+        return this.userId;
     }
 }
 
