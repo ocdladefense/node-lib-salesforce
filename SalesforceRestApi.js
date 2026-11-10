@@ -110,6 +110,18 @@ export default class SalesforceRestApi extends HttpClient {
     }
 
 
+    async composite(req) {
+        this.method = 'POST';
+        this.path = SalesforceRestApi.BASE_URL + 'composite/tree/' + req.getSObject();
+        this.body = req.getBody();
+        console.log("COMPOSITE REQUEST BODY:", this.body);
+        console.log("COMPOSITE REQUEST SOBJECT:", req.getSObject());
+        console.log("COMPOSITE REQUEST PATH:", this.path);
+
+        return await this.send();
+    }
+
+
     /**
     * @param {string} resourceId - The SQL query.
     * @returns {object}
@@ -167,7 +179,8 @@ export default class SalesforceRestApi extends HttpClient {
         delete record.Id;
 
         Object.keys(record).forEach((key) => {
-            if (record[key] === "") {
+            if (record[key] === "")
+            {
                 record[key] = null;
             }
         });
